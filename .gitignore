@@ -1,0 +1,11 @@
+# Node / React
+frontend/node_modules
+frontend/dist
+# Python
+backend/.venv
+backend/__pycache__
+backend/.pytest_cache
+# Models & env
+backend/app/ml/model.pkl
+.env
+*.env
