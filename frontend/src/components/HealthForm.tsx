@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { predict, HealthInput, ApiError } from "../api/client";
+import { predict, ApiError } from "../api/client";
+
+// Define HealthInput locally to avoid import issues
+interface HealthInput {
+  pregnancies: number;
+  glucose: number;
+  bloodPressure: number;
+  skinThickness: number;
+  insulin: number;
+  bmi: number;
+  diabetesPedigree: number;
+  age: number;
+}
 
 type Props = { onResult: (risk: number) => void };
 
