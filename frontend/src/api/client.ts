@@ -1,107 +1,95 @@
-export const API_BASE = (import.meta.env.VITE_API_BASE as string) || "http://localhost:8000";
+export const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string) ||
+  (import.meta.env.VITE_API_BASE as string) || // fallback to your old var
+  "http://localhost:8000";
 
-export interface HealthInput {
-  pregnancies: number;
-  glucose: number;
-  bloodPressure: number;
-  skinThickness: number;
-  insulin: number;
-  bmi: number;
-  diabetesPedigree: number;
-  age: number;
+/** BRFSS 2015 feature schema */
+export interface HealthIndicators {
+  HighBP: number;
+  HighChol: number;
+  CholCheck: number;
+  BMI: number;
+  Smoker: number;
+  Stroke: number;
+  HeartDiseaseorAttack: number;
+  PhysActivity: number;
+  Fruits: number;
+  Veggies: number;
+  HvyAlcoholConsump: number;
+  AnyHealthcare: number;
+  NoDocbcCost: number;
+  GenHlth: number;
+  MentHlth: number;
+  PhysHlth: number;
+  DiffWalk: number;
+  Sex: number;
+  Age: number;
+  Education: number;
+  Income: number;
 }
 
-export interface PredictionResponse {
-  risk: number;
-  modelVersion: string;
-  ts: string;
-}
+type PredictionResponse = { probability: number };
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public statusText?: string
-  ) {
+  public status?: number;
+  public statusText?: string;
+
+  constructor(message: string, status?: number, statusText?: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
+    this.status = status;
+    this.statusText = statusText;
   }
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-    
+    let msg = `HTTP ${response.status}: ${response.statusText}`;
     try {
-      const errorData = await response.json();
-      if (errorData.detail) {
-        errorMessage = Array.isArray(errorData.detail) 
-          ? errorData.detail.map((err: any) => err.msg || err.message || JSON.stringify(err)).join(', ')
-          : errorData.detail;
-      } else if (errorData.message) {
-        errorMessage = errorData.message;
-      } else if (errorData.error) {
-        errorMessage = errorData.error;
-      }
+      const j = await response.json();
+      if (j?.detail) {
+        msg = Array.isArray(j.detail)
+          ? j.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(", ")
+          : j.detail;
+      } else if (j?.message) msg = j.message;
+      else if (j?.error) msg = j.error;
     } catch {
-      // If response is not JSON, try to get text
       try {
-        const errorText = await response.text();
-        if (errorText) {
-          errorMessage = errorText;
-        }
-      } catch {
-        // Use default error message
-      }
+        const t = await response.text();
+        if (t) msg = t;
+      } catch {}
     }
-    
-    throw new ApiError(errorMessage, response.status, response.statusText);
+    throw new ApiError(msg, response.status, response.statusText);
   }
-  
   return response.json();
 }
 
-export async function predict(body: HealthInput): Promise<PredictionResponse> {
+export async function predict(body: HealthIndicators): Promise<number> {
   try {
-    const response = await fetch(`${API_BASE}/predict`, {
+    const res = await fetch(`${API_BASE}/predict`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    
-    return handleResponse<PredictionResponse>(response);
+    const data = await handleResponse<PredictionResponse>(res);
+    return data.probability; // 0..1
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    
-    // Handle network errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof ApiError) throw error;
+    if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new ApiError(
-        'Unable to connect to the server. Please check your internet connection and ensure the backend is running.',
+        "Unable to connect to the server. Ensure the backend is running.",
         0,
-        'Network Error'
+        "Network Error"
       );
     }
-    
-    // Handle other unexpected errors
-    throw new ApiError(
-      error instanceof Error ? error.message : 'An unexpected error occurred',
-      0,
-      'Unknown Error'
-    );
+    throw new ApiError(error instanceof Error ? error.message : "Unknown error", 0, "Unknown");
   }
 }
 
-// Health check function
 export async function healthCheck(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE}/health`, {
-      method: "GET",
-    });
-    return response.ok;
+    const r = await fetch(`${API_BASE}/health`);
+    return r.ok;
   } catch {
     return false;
   }
