@@ -1,24 +1,12 @@
-import os, joblib, numpy as np
-from datetime import datetime, timezone
-from dotenv import load_dotenv
+# services/predict_service.py
+import joblib, pandas as pd, os
 
-load_dotenv()
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "model", "model.joblib")
+_art = joblib.load(MODEL_PATH)               # {"model": clf, "features": [...]}
+_model = _art["model"]
+_FEATURES = _art["features"]
 
-FEATURES = [
-    "pregnancies","glucose","bloodPressure","skinThickness",
-    "insulin","bmi","diabetesPedigree","age"
-]
-
-MODEL_DIR = os.getenv("MODEL_DIR", "app/model")
-MODEL_VERSION = os.getenv("MODEL_VERSION", "unknown")
-MODEL_PATH = os.path.join(MODEL_DIR, "model.joblib")
-MODEL = joblib.load(MODEL_PATH)
-
-def predict_one(payload: dict):
-    x = np.array([[payload[f] for f in FEATURES]], dtype=float)
-    risk = float(MODEL.predict_proba(x)[0, 1])
-    return {
-        "risk": risk,
-        "modelVersion": MODEL_VERSION,
-        "ts": datetime.now(timezone.utc).isoformat()
-    }
+def predict_proba(payload_dict: dict) -> float:
+    # payload_dict keys must match schema and FEATURES names
+    X = pd.DataFrame([[payload_dict[f] for f in _FEATURES]], columns=_FEATURES)
+    return float(_model.predict_proba(X)[:,1][0])
