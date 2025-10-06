@@ -1,27 +1,70 @@
-/* Subtle background + glass cards + nicer inputs */
+/* theme.css — imported after: @import "tailwindcss"; */
+
 :root{
   --card-bg: rgba(255,255,255,0.7);
   --glass: rgba(255,255,255,0.6);
   --glass-border: rgba(255,255,255,0.35);
 }
+
 html,body,#root{height:100%}
+
 body{
   background:
     radial-gradient(1200px 600px at -10% -10%, #dbeafe 0%, transparent 60%),
     radial-gradient(900px 500px at 110% 20%, #ede9fe 0%, transparent 60%),
     linear-gradient(180deg,#f8fafc, #eef2ff 60%, #eff6ff 100%);
 }
+
 .glass{
   background: var(--glass);
   backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
 }
-.input{
-  @apply w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500;
-  background: rgba(255,255,255,0.9);
+
+/* Component classes using standard CSS */
+.input,
+.select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  background-color: rgba(255, 255, 255, 0.9);
 }
-.select{ @apply input; }
-.label{ @apply block text-sm font-medium text-gray-700 mb-1; }
-.help{ @apply text-xs text-gray-500 mt-1; }
-.section-title{ @apply text-sm font-semibold text-indigo-700 uppercase tracking-wide mb-2; }
-.kbd{ @apply px-1.5 py-0.5 rounded border bg-gray-50 text-gray-700 text-[11px]; }
+
+.input:focus,
+.select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #6366f1;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.help {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4338ca;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.kbd {
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #374151;
+  font-size: 0.6875rem;
+}
