@@ -18,8 +18,7 @@ function App() {
               AI-Powered Diabetes Risk Assessment
             </p>
             <p className="text-sm text-gray-500 max-w-2xl mx-auto">
-              Get an instant assessment of your diabetes risk based on key health indicators. 
-              Our machine learning model analyzes your health data to provide personalized risk insights.
+              This tool uses a logistic model trained on CDC BRFSS 2015 diabetes health indicators.
             </p>
           </div>
 
@@ -53,11 +52,11 @@ function App() {
                   <div className="bg-gray-50 rounded-lg p-4 text-left">
                     <h4 className="font-medium text-gray-800 mb-2">What you'll need:</h4>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      <li>• Blood glucose level</li>
-                      <li>• Blood pressure reading</li>
-                      <li>• BMI (Body Mass Index)</li>
-                      <li>• Age and pregnancy history</li>
-                      <li>• Insulin and skin thickness data</li>
+                      <li>• BMI </li>
+                      <li>• Self-reported general health (1-5)</li>
+                      <li>• phsyical activity, smoking, alcohol (0/1)</li>
+                      <li>• recent healthcare access flags (0/1)</li>
+                      <li>• Age, education, Income codes </li>
                     </ul>
                   </div>
                 </div>

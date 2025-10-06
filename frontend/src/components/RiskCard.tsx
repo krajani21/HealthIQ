@@ -1,82 +1,51 @@
 export default function RiskCard({ score }: { score: number }) {
-  const riskPercentage = Math.round(score * 100);
-  
-  const getRiskLevel = (percentage: number) => {
-    if (percentage < 30) return { level: 'Low', color: 'green', bgColor: 'bg-green-50', borderColor: 'border-green-200', textColor: 'text-green-800' };
-    if (percentage < 60) return { level: 'Moderate', color: 'yellow', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', textColor: 'text-yellow-800' };
-    if (percentage < 80) return { level: 'High', color: 'orange', bgColor: 'bg-orange-50', borderColor: 'border-orange-200', textColor: 'text-orange-800' };
-    return { level: 'Very High', color: 'red', bgColor: 'bg-red-50', borderColor: 'border-red-200', textColor: 'text-red-800' };
+  const pct = Math.round(score * 100);
+
+  const bucket =
+    pct < 30 ? "low" : pct < 60 ? "moderate" : pct < 80 ? "high" : "veryhigh";
+
+  const styles: Record<string, { box: string; text: string; pill: string; label: string }> = {
+    low:      { box: "bg-green-50 border-green-200", text: "text-green-800", pill: "bg-green-100", label: "Low" },
+    moderate: { box: "bg-yellow-50 border-yellow-200", text: "text-yellow-800", pill: "bg-yellow-100", label: "Moderate" },
+    high:     { box: "bg-orange-50 border-orange-200", text: "text-orange-800", pill: "bg-orange-100", label: "High" },
+    veryhigh: { box: "bg-red-50 border-red-200", text: "text-red-800", pill: "bg-red-100", label: "Very High" },
   };
 
-  const getRiskMessage = (percentage: number) => {
-    if (percentage < 30) return 'Your risk of developing diabetes is relatively low. Continue maintaining a healthy lifestyle.';
-    if (percentage < 60) return 'You have a moderate risk of developing diabetes. Consider consulting with a healthcare provider.';
-    if (percentage < 80) return 'You have a high risk of developing diabetes. We recommend consulting with a healthcare provider soon.';
-    return 'You have a very high risk of developing diabetes. Please consult with a healthcare provider immediately.';
-  };
+  const msg =
+    bucket === "low" ? "Risk is relatively low. Maintain healthy habits."
+    : bucket === "moderate" ? "Moderate risk. Consider a checkup."
+    : bucket === "high" ? "High risk. Schedule a consultation soon."
+    : "Very high risk. Seek medical advice promptly.";
 
-  const getRecommendations = (percentage: number) => {
-    if (percentage < 30) return [
-      'Maintain a balanced diet',
-      'Exercise regularly',
-      'Monitor your health regularly'
-    ];
-    if (percentage < 60) return [
-      'Consult with a healthcare provider',
-      'Adopt a healthier diet',
-      'Increase physical activity',
-      'Monitor blood sugar levels'
-    ];
-    if (percentage < 80) return [
-      'Schedule a medical consultation immediately',
-      'Consider diabetes screening tests',
-      'Implement lifestyle changes',
-      'Monitor health metrics closely'
-    ];
-    return [
-      'Seek immediate medical attention',
-      'Schedule comprehensive diabetes screening',
-      'Implement strict lifestyle modifications',
-      'Consider medication consultation'
-    ];
-  };
+  const recs =
+    bucket === "low" ? ["Balanced diet", "Regular exercise", "Periodic checkups"]
+    : bucket === "moderate" ? ["Consult a provider", "Improve diet quality", "Increase activity", "Monitor glucose"]
+    : bucket === "high" ? ["Book screening", "Implement changes", "Track metrics closely"]
+    : ["Seek medical attention", "Comprehensive screening", "Tight lifestyle controls"];
 
-  const riskInfo = getRiskLevel(riskPercentage);
-  const message = getRiskMessage(riskPercentage);
-  const recommendations = getRecommendations(riskPercentage);
+  const s = styles[bucket];
 
   return (
-    <div className={`mt-6 ${riskInfo.bgColor} ${riskInfo.borderColor} border-2 rounded-lg p-6 shadow-lg`}>
+    <div className={`mt-6 ${s.box} border-2 rounded-lg p-6 shadow-lg`}>
       <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold mb-2">Diabetes Risk Assessment</h3>
-        <div className={`text-4xl font-bold ${riskInfo.textColor} mb-2`}>
-          {riskPercentage}%
-        </div>
-        <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium bg-${riskInfo.color}-100 ${riskInfo.textColor}`}>
-          {riskInfo.level} Risk
+        <h3 className="text-lg font-semibold mb-2">Diabetes Risk</h3>
+        <div className={`text-4xl font-bold ${s.text} mb-2`}>{pct}%</div>
+        <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${s.pill} ${s.text}`}>
+          {s.label} Risk
         </div>
       </div>
-      
-      <div className="mb-4">
-        <p className="text-gray-700 text-sm leading-relaxed">{message}</p>
-      </div>
-      
-      <div>
-        <h4 className="font-semibold text-gray-800 mb-2">Recommendations:</h4>
-        <ul className="space-y-1">
-          {recommendations.map((rec, index) => (
-            <li key={index} className="text-sm text-gray-700 flex items-start">
-              <span className="text-blue-500 mr-2">•</span>
-              {rec}
-            </li>
-          ))}
-        </ul>
-      </div>
-      
+      <p className="text-gray-700 text-sm mb-3">{msg}</p>
+      <h4 className="font-semibold text-gray-800 mb-2">Recommendations</h4>
+      <ul className="space-y-1">
+        {recs.map((r, i) => (
+          <li key={i} className="text-sm text-gray-700 flex items-start">
+            <span className="text-blue-500 mr-2">•</span>{r}
+          </li>
+        ))}
+      </ul>
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
         <p className="text-xs text-blue-800">
-          <strong>Disclaimer:</strong> This assessment is for informational purposes only and should not replace professional medical advice. 
-          Please consult with a healthcare provider for proper diagnosis and treatment.
+          <strong>Disclaimer:</strong> Informational only. Consult a clinician.
         </p>
       </div>
     </div>
