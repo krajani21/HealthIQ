@@ -1,89 +1,74 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HealthForm from "./components/HealthForm";
 import RiskCard from "./components/RiskCard";
+import NavBar from "./components/NavBar";
+import { healthCheck } from "./api/client";
+import "./styles/theme.css";
 
-function App() {
+export default function App() {
   const [risk, setRisk] = useState<number | null>(null);
+  const [alive, setAlive] = useState<boolean | null>(null);
+
+  useEffect(() => { healthCheck().then(setAlive).catch(() => setAlive(false)); }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              HealthIQ
-            </h1>
-            <p className="text-lg text-gray-600 mb-2">
-              AI-Powered Diabetes Risk Assessment
-            </p>
-            <p className="text-sm text-gray-500 max-w-2xl mx-auto">
-              This tool uses a logistic model trained on CDC BRFSS 2015 diabetes health indicators.
-            </p>
+    <div className="min-h-screen">
+      <NavBar />
+
+      <main className="mx-auto max-w-6xl px-4 py-8 grid lg:grid-cols-2 gap-8">
+        {/* Left: Form */}
+        <section className="glass rounded-2xl p-6 lg:p-8 shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-800">Diabetes Risk Assessment</h1>
+            {alive !== null && (
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                alive ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+              }`}>
+                API {alive ? "Connected" : "Offline"}
+              </span>
+            )}
           </div>
+          <p className="text-sm text-gray-600 mb-6">
+            Model trained on CDC BRFSS 2015 indicators. Enter your data to compute probability.
+          </p>
+          <HealthForm onResult={setRisk} />
+        </section>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Form Section */}
-            <div className="order-2 lg:order-1">
-              <HealthForm onResult={setRisk} />
-            </div>
-
-            {/* Results Section */}
-            <div className="order-1 lg:order-2">
-              {risk !== null ? (
-                <RiskCard score={risk} />
-              ) : (
-                <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-                  <div className="mb-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Ready for Assessment
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      Fill out the health form to get your personalized diabetes risk assessment.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-gray-50 rounded-lg p-4 text-left">
-                    <h4 className="font-medium text-gray-800 mb-2">What you'll need:</h4>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      <li>• BMI </li>
-                      <li>• Self-reported general health (1-5)</li>
-                      <li>• phsyical activity, smoking, alcohol (0/1)</li>
-                      <li>• recent healthcare access flags (0/1)</li>
-                      <li>• Age, education, Income codes </li>
-                    </ul>
-                  </div>
+        {/* Right: Result + Info */}
+        <section className="space-y-8">
+          <div className="glass rounded-2xl p-6 lg:p-8 shadow-md">
+            {risk !== null ? (
+              <RiskCard score={risk} />
+            ) : (
+              <div className="text-center py-10">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 24 24" className="text-indigo-600">
+                    <path fill="currentColor" d="M11 7h2v6h-2zm0 8h2v2h-2z"/>
+                  </svg>
                 </div>
-              )}
-            </div>
+                <div className="text-gray-700 font-medium">Ready when you are</div>
+                <div className="text-sm text-gray-500">Fill the form to see your risk</div>
+              </div>
+            )}
           </div>
 
-          {/* Footer */}
-          <div className="mt-12 text-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-              <h3 className="font-semibold text-gray-800 mb-2">About This Assessment</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                This diabetes risk assessment uses machine learning algorithms trained on the Pima Indians Diabetes Dataset 
-                to provide personalized risk predictions based on your health indicators.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
-                <span>✓ AI-Powered Analysis</span>
-                <span>✓ Instant Results</span>
-                <span>✓ Privacy Protected</span>
-                <span>✓ Evidence-Based</span>
-              </div>
-            </div>
+          <div className="glass rounded-2xl p-6 lg:p-8 shadow-md">
+            <h3 className="font-semibold text-gray-800 mb-3">Inputs you will provide</h3>
+            <ul className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+              <li>• BMI</li>
+              <li>• General health (1–5)</li>
+              <li>• Physical activity</li>
+              <li>• Smoking, alcohol</li>
+              <li>• Healthcare access flags</li>
+              <li>• Age, education, income</li>
+            </ul>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+
+      <footer className="px-4 py-8 text-center text-xs text-gray-500">
+        Not medical advice. For education only.
+      </footer>
     </div>
   );
 }
-
-export default App;
