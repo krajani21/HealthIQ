@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from app.schemas.prediction import HealthInput, PredictionOut
-from app.services.predict_service import predict_one
+from app.schemas.prediction import HealthIndicators
+from app.services.predict_service import predict_proba
 
 router = APIRouter()
 
-@router.post("", response_model=PredictionOut)
-def predict_endpoint(data: HealthInput):
-    return predict_one(data.dict())
+@router.post("")
+def predict_endpoint(data: HealthIndicators):
+    prob = predict_proba(data.dict())
+    return {"probability": prob}
